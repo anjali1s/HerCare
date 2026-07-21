@@ -1,29 +1,33 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from periods import router as period_router
+
 from database import engine, Base
 
 from auth import router as auth_router
 from chat import router as chat_router
+from periods import router as period_router
 
 from dotenv import load_dotenv
+
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+import os
 
 
 load_dotenv()
 
 
-
-# -------------------------
-# Database Startup
-# -------------------------
+# =========================
+# DATABASE STARTUP
+# =========================
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
     print("Starting application...")
 
-    # Create SQLite tables
     Base.metadata.create_all(
         bind=engine
     )
@@ -36,20 +40,15 @@ async def lifespan(app: FastAPI):
 
 
 
-
-
-# -------------------------
-# FastAPI App
-# -------------------------
+# =========================
+# FASTAPI APP
+# =========================
 
 app = FastAPI(
 
     title="Women's Health AI Assistant",
 
-    description=(
-        "Secure RAG based healthcare "
-        "information assistant"
-    ),
+    description="Secure RAG based healthcare information assistant",
 
     version="1.0.0",
 
@@ -59,11 +58,9 @@ app = FastAPI(
 
 
 
-
-
-# -------------------------
-# React CORS
-# -------------------------
+# =========================
+# CORS
+# =========================
 
 app.add_middleware(
 
@@ -71,105 +68,139 @@ app.add_middleware(
 
     allow_origins=[
 
-        "http://localhost:5174",
         "http://localhost:5173",
-       
+        "http://localhost:5174"
 
     ],
 
     allow_credentials=True,
 
-    allow_methods=[
+    allow_methods=["*"],
 
-        "*"
-
-    ],
-
-    allow_headers=[
-
-        "*"
-
-    ],
+    allow_headers=["*"],
 
 )
 
 
 
-
-
-# -------------------------
-# API Routes
-# -------------------------
-
+# =========================
+# API ROUTES
+# =========================
 app.include_router(
-
-    auth_router,
-
-    prefix="/auth",
-
-    tags=["Authentication"]
-
-)
-
-
-
-app.include_router(
-
-    chat_router,
-
-    prefix="/chat",
-
-    tags=["Chat"]
-
+    auth_router
 )
 
 app.include_router(
-    period_router,
-    prefix="/period",
-    tags=["Period Tracker"]
+    chat_router
+)
+
+
+app.include_router(
+    period_router
 )
 
 
 
-# -------------------------
-# Health Routes
-# -------------------------
+# =========================
+# HEALTH CHECK
+# =========================
 
 @app.get("/")
 def home():
 
     return {
 
-        "message":
-        "Women's Health AI API running",
+        "message": "Women's Health AI API running",
 
-        "status":
-        "active"
+        "status": "active"
 
     }
-
-
 
 
 
 @app.get("/health")
-def health_check():
+def health():
 
     return {
 
-        "api":
-        "working",
+        "api": "working",
 
-        "database":
-        "connected"
+        "database": "connected"
 
     }
 
 
-from periods import router as period_router
 
-app.include_router(
-    period_router,
-    prefix="/period",
-    tags=["Period Tracker"]
+# =========================
+# REACT FRONTEND
+# =========================
+
+frontend_path = os.path.join(
+
+    os.path.dirname(__file__),
+
+    "frontend",
+
+    "dist"
+
 )
+
+
+
+assets_path = os.path.join(
+
+    frontend_path,
+
+    "assets"
+
+)
+
+
+
+if os.path.exists(assets_path):
+
+    app.mount(
+
+        "/assets",
+
+        StaticFiles(
+            directory=assets_path
+        ),
+
+        name="assets"
+
+    )
+
+
+
+
+@app.get("/{full_path:path}")
+def serve_react(full_path: str):
+
+
+    file_path = os.path.join(
+
+        frontend_path,
+
+        full_path
+
+    )
+
+
+    if os.path.isfile(file_path):
+
+        return FileResponse(file_path)
+
+
+
+    return FileResponse(
+
+        os.path.join(
+
+            frontend_path,
+
+            "index.html"
+
+        )
+
+    )

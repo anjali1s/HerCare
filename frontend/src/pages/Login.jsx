@@ -23,9 +23,8 @@ setError("");
 
 try{
 
-
 const res = await api.post(
-"/auth/login",
+"/login",
 {
 email,
 password
@@ -33,12 +32,10 @@ password
 );
 
 
-
 localStorage.setItem(
 "token",
 res.data.access_token
 );
-
 
 
 navigate("/chat");
@@ -60,7 +57,6 @@ setLoading(false);
 
 }
 
-
 }
 
 
@@ -70,18 +66,60 @@ return (
 <div className="auth-page">
 
 
+{/* HEADER LIKE CHAT PAGE */}
+
+<header className="auth-header">
+
+
+<div>
+
+<h1>
+HerCare Plus
+</h1>
+
+<p>
+Women's Health AI Assistant
+</p>
+
+</div>
+
+
+
+<div className="auth-logo">
+
+🌸
+
+</div>
+
+
+</header>
+
+
+
+
+
+{/* CENTER LOGIN CARD */}
+
+<div className="auth-container">
+
+
 <div className="auth-card">
+
 
 
 <div className="brand">
 
+
 <div className="logo">
+
 ✨
+
 </div>
 
 
+
 <h1>
-Health AI
+Welcome Back
 </h1>
 
 
@@ -89,13 +127,18 @@ Health AI
 Your intelligent health assistant
 </p>
 
+
 </div>
 
 
 
+
+
 <h2>
-Welcome back
+Login
 </h2>
+
+
 
 
 
@@ -115,6 +158,8 @@ e=>setEmail(e.target.value)
 
 
 
+
+
 <input
 
 type="password"
@@ -130,40 +175,70 @@ e=>setPassword(e.target.value)
 />
 
 
+
+
+
 {
 error &&
+
 <p className="error">
+
 {error}
+
 </p>
+
 }
 
 
 
-<button 
+
+
+<button
+
 onClick={login}
+
 disabled={loading}
+
 >
 
+
 {
-loading?
+loading
+?
 "Signing in..."
 :
 "Login"
 }
 
+
 </button>
+
+
 
 
 
 <div className="switch">
 
+
 Don't have an account?
 
-<span onClick={()=>navigate("/register")}>
+
+<span
+
+onClick={
+()=>navigate("/register")
+}
+
+>
 
 Create account
 
 </span>
+
+
+
+</div>
+
 
 
 </div>
@@ -178,25 +253,6 @@ Create account
 
 
 }
-const handleLogin = async () => {
-  try {
-    const response = await axios.post(
-      "http://127.0.0.1:8000/auth/login",
-      {
-        email,
-        password
-      }
-    );
 
-    localStorage.setItem(
-      "token",
-      response.data.access_token
-    );
-
-    console.log("Login successful");
-  } catch (error) {
-    console.log(error);
-  }
-};
 
 export default Login;

@@ -1,10 +1,10 @@
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
 import api from "../api/api";
+import "./auth.css";
 
 
 function Register(){
-
 
 const navigate = useNavigate();
 
@@ -13,16 +13,23 @@ const [name,setName]=useState("");
 const [email,setEmail]=useState("");
 const [password,setPassword]=useState("");
 
+const [loading,setLoading]=useState(false);
+const [error,setError]=useState("");
+
+
 
 
 async function register(){
+
+setLoading(true);
+setError("");
 
 
 try{
 
 
 await api.post(
-"/auth/register",
+"/register",
 {
 name,
 email,
@@ -31,28 +38,78 @@ password
 );
 
 
-alert("Account created");
 
-navigate("/login");
+navigate("/");
 
 
 }
 
-catch(error){
 
-alert(
-error.response?.data?.detail ||
+catch(err){
+
+
+setError(
+err.response?.data?.detail ||
 "Registration failed"
 );
 
+
+}
+
+
+finally{
+
+setLoading(false);
+
 }
 
 
 }
+
 
 
 
 return (
+
+<div className="auth-page">
+
+
+
+{/* HEADER SAME AS CHAT PAGE */}
+
+<header className="auth-header">
+
+
+<div>
+
+<h1>
+HerCare Plus
+</h1>
+
+
+<p>
+Women's Health AI Assistant
+</p>
+
+
+</div>
+
+
+
+<div className="auth-logo">
+
+🌸
+
+</div>
+
+
+</header>
+
+
+
+
+
+
 
 <div className="auth-container">
 
@@ -60,15 +117,45 @@ return (
 <div className="auth-card">
 
 
-<h2>
+
+
+
+<div className="brand">
+
+
+<div className="logo">
+
+✨
+
+</div>
+
+
+
+<h1>
 Create Account
-</h2>
+</h1>
+
+
+<p>
+Start your personalized health journey
+</p>
+
+
+</div>
+
+
+
+
 
 
 
 <input
 
-placeholder="Full Name"
+type="text"
+
+placeholder="Full name"
+
+value={name}
 
 onChange={
 e=>setName(e.target.value)
@@ -78,9 +165,16 @@ e=>setName(e.target.value)
 
 
 
+
+
+
 <input
 
-placeholder="Email"
+type="email"
+
+placeholder="Email address"
+
+value={email}
 
 onChange={
 e=>setEmail(e.target.value)
@@ -90,11 +184,16 @@ e=>setEmail(e.target.value)
 
 
 
+
+
+
 <input
 
 type="password"
 
 placeholder="Password"
+
+value={password}
 
 onChange={
 e=>setPassword(e.target.value)
@@ -104,25 +203,86 @@ e=>setPassword(e.target.value)
 
 
 
-<button onClick={register}>
-
-Register
-
-</button>
 
 
 
-<div className="auth-link">
 
-Already have account?
+{
+
+error &&
+
+<p className="error">
+
+{error}
+
+</p>
+
+}
+
+
+
+
+
+
 
 <button
-onClick={()=>navigate("/login")}
+
+onClick={register}
+
+disabled={loading}
+
 >
-Login
+
+
+{
+
+loading
+
+?
+
+"Creating account..."
+
+:
+
+"Register"
+
+}
+
+
 </button>
 
 
+
+
+
+
+
+<div className="switch">
+
+
+Already have an account?
+
+
+<span
+
+onClick={
+()=>navigate("/")
+}
+
+>
+
+Login
+
+</span>
+
+
+
+</div>
+
+
+
+
+
 </div>
 
 
@@ -130,6 +290,7 @@ Login
 
 
 </div>
+
 
 );
 

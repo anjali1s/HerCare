@@ -3,7 +3,9 @@ import axios from "axios";
 
 const API = axios.create({
 
-    baseURL:"http://127.0.0.1:8000"
+    baseURL:
+        import.meta.env.VITE_API_URL ||
+        "http://127.0.0.1:8000"
 
 });
 
@@ -11,18 +13,27 @@ const API = axios.create({
 
 API.interceptors.request.use(
 
-    config=>{
+    config => {
 
         const token = localStorage.getItem("token");
 
-        if(token){
+
+        if (token) {
 
             config.headers.Authorization =
-            `Bearer ${token}`;
+                `Bearer ${token}`;
 
         }
 
+
         return config;
+
+    },
+
+
+    error => {
+
+        return Promise.reject(error);
 
     }
 

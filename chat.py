@@ -21,20 +21,23 @@ from auth import get_current_user
 from rag_chatbot import ask_question
 
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/chat",
+    tags=["Chat"]
+)
 
 
 
-# -------------------------
-# Request Schemas
-# -------------------------
+# =========================
+# SCHEMAS
+# =========================
+
 
 class ChatRequest(BaseModel):
 
     conversation_id: int | None = None
 
     question: str
-
 
 
 
@@ -45,9 +48,11 @@ class NewConversationRequest(BaseModel):
 
 
 
-# -------------------------
-# Create New Conversation
-# -------------------------
+
+# =========================
+# CREATE CONVERSATION
+# =========================
+
 
 @router.post("/conversation")
 def create_conversation(
@@ -80,7 +85,7 @@ def create_conversation(
 
     return {
 
-        "conversation_id": conversation.id,
+        "id": conversation.id,
 
         "title": conversation.title
 
@@ -90,9 +95,10 @@ def create_conversation(
 
 
 
-# -------------------------
-# Get User Conversations
-# -------------------------
+# =========================
+# GET ALL CONVERSATIONS
+# =========================
+
 
 @router.get("/conversations")
 def get_conversations(
@@ -104,23 +110,28 @@ def get_conversations(
 ):
 
 
-    conversations = db.query(
-        Conversation
-    ).filter(
+    conversations = (
 
-        Conversation.user_id == current_user.id
+        db.query(Conversation)
 
-    ).order_by(
+        .filter(
+            Conversation.user_id == current_user.id
+        )
 
-        Conversation.created_at.desc()
+        .order_by(
+            Conversation.created_at.desc()
+        )
 
-    ).all()
+        .all()
+
+    )
 
 
 
     return [
 
         {
+
             "id": c.id,
 
             "title": c.title,
@@ -137,57 +148,72 @@ def get_conversations(
 
 
 
-# -------------------------
-# Get Messages From Chat
-# -------------------------
+
+
+# =========================
+# LOAD CHAT HISTORY
+# =========================
+
 
 @router.get(
     "/conversation/{conversation_id}"
 )
+
 def get_chat_history(
 
-    conversation_id: int,
+    conversation_id:int,
 
-    db: Session = Depends(get_db),
+    db:Session = Depends(get_db),
 
-    current_user: User = Depends(get_current_user)
+    current_user:User = Depends(get_current_user)
 
 ):
 
 
-    conversation = db.query(
-        Conversation
-    ).filter(
+    conversation = (
 
-        Conversation.id == conversation_id,
+        db.query(Conversation)
 
-        Conversation.user_id == current_user.id
+        .filter(
 
-    ).first()
+            Conversation.id == conversation_id,
+
+            Conversation.user_id == current_user.id
+
+        )
+
+        .first()
+
+    )
 
 
 
     if not conversation:
 
         raise HTTPException(
+
             status_code=404,
+
             detail="Conversation not found"
+
         )
+
 
 
 
     return [
 
         {
-            "role": message.role,
 
-            "content": message.content,
+            "role":m.role,
 
-            "time": message.created_at
+            "content":m.content,
+
+            "created_at":m.created_at
 
         }
 
-        for message in conversation.messages
+        for m in conversation.messages
 
     ]
 
@@ -195,23 +221,25 @@ def get_chat_history(
 
 
 
-# -------------------------
-# Main Chat Endpoint
-# -------------------------
+
+
+# =========================
+# CHAT WITH AI
+# =========================
+
 
 @router.post("/")
 def chat(
 
-    data: ChatRequest,
+    data:ChatRequest,
 
-    db: Session = Depends(get_db),
+    db:Session = Depends(get_db),
 
-    current_user: User = Depends(get_current_user)
+    current_user:User = Depends(get_current_user)
 
 ):
 
 
-    # Validate question
 
     if not data.question.strip():
 
@@ -225,15 +253,20 @@ def chat(
 
 
 
-    # Create conversation automatically
-    # if first message
+
+
+    # ---------------------
+    # Create / Load Chat
+    # ---------------------
+
 
     if data.conversation_id is None:
 
 
+
         conversation = Conversation(
 
-            title=data.question[:40],
+            title=data.question[:50],
 
             user_id=current_user.id
 
@@ -251,19 +284,27 @@ def chat(
     else:
 
 
-        conversation = db.query(
-            Conversation
-        ).filter(
 
-            Conversation.id == data.conversation_id,
+        conversation=(
 
-            Conversation.user_id == current_user.id
+            db.query(Conversation)
 
-        ).first()
+            .filter(
+
+                Conversation.id == data.conversation_id,
+
+                Conversation.user_id == current_user.id
+
+            )
+
+            .first()
+
+        )
 
 
 
         if not conversation:
+
 
             raise HTTPException(
 
@@ -276,7 +317,13 @@ def chat(
 
 
 
-    # Save user message
+
+
+
+    # ---------------------
+    # Save User Message
+    # ---------------------
+
 
     user_message = Message(
 
@@ -295,17 +342,45 @@ def chat(
 
 
 
-    # Call RAG chatbot
-
-    answer = ask_question(
-        data.question
-    )
 
 
 
-    # Save AI response
+    # ---------------------
+    # RAG RESPONSE
+    # ---------------------
 
-    assistant_message = Message(
+
+    try:
+
+
+        answer = ask_question(
+            data.question
+        )
+
+
+    except Exception as e:
+
+
+        answer = (
+
+            "Sorry 🌸 I am unable to answer right now."
+
+        )
+
+        print("RAG ERROR:",e)
+
+
+
+
+
+
+
+    # ---------------------
+    # Save AI Message
+    # ---------------------
+
+
+    ai_message = Message(
 
         conversation_id=conversation.id,
 
@@ -316,16 +391,25 @@ def chat(
     )
 
 
-    db.add(assistant_message)
+    db.add(ai_message)
 
     db.commit()
 
 
 
+
+
     return {
 
-        "conversation_id": conversation.id,
 
-        "answer": answer
+        "conversation_id":
+
+        conversation.id,
+
+
+        "answer":
+
+        answer
+
 
     }

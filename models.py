@@ -4,6 +4,7 @@ from sqlalchemy import (
     String,
     Text,
     DateTime,
+    Date,
     ForeignKey
 )
 
@@ -56,12 +57,27 @@ class User(Base):
     )
 
 
-    # One user can have many conversations
     conversations = relationship(
         "Conversation",
         back_populates="user",
-        cascade="all, delete"
+        cascade="all, delete-orphan"
     )
+
+
+    period_cycle = relationship(
+        "PeriodCycle",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan"
+    )
+
+
+    period_history = relationship(
+        "PeriodHistory",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
 
 
 
@@ -101,19 +117,18 @@ class Conversation(Base):
     )
 
 
-    # Relationship back to user
     user = relationship(
         "User",
         back_populates="conversations"
     )
 
 
-    # One conversation has many messages
     messages = relationship(
         "Message",
         back_populates="conversation",
-        cascade="all, delete"
+        cascade="all, delete-orphan"
     )
+
 
 
 
@@ -145,9 +160,6 @@ class Message(Base):
         String(20),
         nullable=False
     )
-    # values:
-    # user
-    # assistant
 
 
     content = Column(
@@ -165,4 +177,115 @@ class Message(Base):
     conversation = relationship(
         "Conversation",
         back_populates="messages"
+    )
+
+
+
+
+
+# -------------------------
+# Current Period Cycle
+# -------------------------
+
+class PeriodCycle(Base):
+
+    __tablename__ = "period_cycles"
+
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        unique=True
+    )
+
+
+    last_period = Column(
+        Date
+    )
+
+
+    cycle_length = Column(
+        Integer,
+        default=28
+    )
+
+
+    period_length = Column(
+        Integer,
+        default=5
+    )
+
+
+    user = relationship(
+        "User",
+        back_populates="period_cycle"
+    )
+
+
+
+
+
+# -------------------------
+# Period History
+# -------------------------
+
+class PeriodHistory(Base):
+
+    __tablename__ = "period_history"
+
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False
+    )
+
+
+    start_date = Column(
+        Date,
+        nullable=False
+    )
+
+
+    end_date = Column(
+        Date,
+        nullable=False
+    )
+
+
+    cycle_length = Column(
+        Integer,
+        default=28
+    )
+
+
+    period_length = Column(
+        Integer,
+        default=5
+    )
+
+
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )
+
+
+    user = relationship(
+        "User",
+        back_populates="period_history"
     )

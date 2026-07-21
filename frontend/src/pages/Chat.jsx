@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import api from "../api/api";
 import "./Chat.css";
-
+import { useNavigate } from "react-router-dom";
 
 function Chat() {
 
-
+  const navigate = useNavigate();
   const [message, setMessage] = useState("");
 
   const [messages, setMessages] = useState([
@@ -327,6 +327,31 @@ onClick={()=>loadChat(chat.id)}
 
 ))
 }
+
+<div className="sidebar-bottom">
+
+
+<button
+className="period-btn"
+onClick={() => navigate("/period")}
+>
+🌸 Period Tracker
+</button>
+
+
+
+<button
+className="logout-btn"
+onClick={() => {
+    localStorage.removeItem("token");
+    navigate("/login");
+}}
+>
+🚪 Logout
+</button>
+
+
+</div>
 
 
 

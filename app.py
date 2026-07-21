@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-
+from periods import router as period_router
 from database import engine, Base
 
 from auth import router as auth_router
@@ -72,7 +72,7 @@ app.add_middleware(
     allow_origins=[
 
         "http://localhost:5174",
-
+        "http://localhost:5173",
        
 
     ],
@@ -123,7 +123,11 @@ app.include_router(
 
 )
 
-
+app.include_router(
+    period_router,
+    prefix="/period",
+    tags=["Period Tracker"]
+)
 
 
 
@@ -160,3 +164,12 @@ def health_check():
         "connected"
 
     }
+
+
+from periods import router as period_router
+
+app.include_router(
+    period_router,
+    prefix="/period",
+    tags=["Period Tracker"]
+)

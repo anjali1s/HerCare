@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Chat from "./pages/Chat";
-
+import Period from "./pages/Period";  
 
 function App() {
 
@@ -31,6 +31,11 @@ function App() {
           path="/chat" 
           element={<Chat />} 
         />
+
+        <Route 
+    path="/period"
+    element={<Period />}
+/>
 
       </Routes>
 

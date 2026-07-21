@@ -1,0 +1,699 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Women's Health AI Assistant</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    box-sizing:border-box;
+    font-family:'Inter',sans-serif;
+}
+
+
+body{
+
+    margin:0;
+    min-height:100vh;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:
+    linear-gradient(-45deg,#ffe4ec,#ede9fe,#dbeafe,#fdf2f8);
+
+    background-size:400% 400%;
+
+    animation:bgMove 12s ease infinite;
+
+}
+
+
+@keyframes bgMove{
+
+0%{background-position:0% 50%}
+
+50%{background-position:100% 50%}
+
+100%{background-position:0% 50%}
+
+}
+
+
+
+
+.chat-container{
+
+    width:470px;
+    height:760px;
+
+    background:rgba(255,255,255,.75);
+
+    backdrop-filter:blur(20px);
+
+    border-radius:32px;
+
+    overflow:hidden;
+
+    display:flex;
+    flex-direction:column;
+
+    box-shadow:
+    0 30px 70px rgba(0,0,0,.18);
+
+}
+
+
+
+
+.header{
+
+    padding:25px;
+
+    color:white;
+
+    background:
+    linear-gradient(135deg,#ec4899,#8b5cf6);
+
+}
+
+
+
+.header-top{
+
+display:flex;
+align-items:center;
+gap:14px;
+
+}
+
+
+.logo{
+
+width:50px;
+height:50px;
+
+background:white;
+
+border-radius:50%;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-size:25px;
+
+box-shadow:
+0 8px 20px rgba(0,0,0,.15);
+
+animation:float 3s infinite ease-in-out;
+
+}
+
+
+
+@keyframes float{
+
+50%{
+transform:translateY(-5px);
+}
+
+}
+
+
+
+.header h2{
+
+margin:0;
+
+font-size:22px;
+
+}
+
+
+.header p{
+
+margin:10px 0 0 64px;
+
+font-size:13px;
+
+opacity:.9;
+
+}
+
+
+
+
+.chat-box{
+
+flex:1;
+
+padding:22px;
+
+overflow-y:auto;
+
+background:
+rgba(255,255,255,.55);
+
+}
+
+
+
+
+.message{
+
+max-width:85%;
+
+padding:15px 18px;
+
+border-radius:22px;
+
+margin-bottom:16px;
+
+font-size:14px;
+
+line-height:1.6;
+
+animation:slide .35s ease;
+
+}
+
+
+
+@keyframes slide{
+
+from{
+
+opacity:0;
+transform:translateY(15px);
+
+}
+
+to{
+
+opacity:1;
+transform:none;
+
+}
+
+}
+
+
+
+.bot{
+
+background:white;
+
+color:#333;
+
+border:
+
+1px solid #f1f1f1;
+
+border-bottom-left-radius:6px;
+
+box-shadow:
+
+0 5px 15px rgba(0,0,0,.05);
+
+}
+
+
+
+.user{
+
+margin-left:auto;
+
+background:
+
+linear-gradient(135deg,#ec4899,#8b5cf6);
+
+color:white;
+
+border-bottom-right-radius:6px;
+
+}
+
+
+
+
+
+.bot ul{
+
+padding-left:20px;
+
+}
+
+
+
+.bot li{
+
+margin-bottom:6px;
+
+}
+
+
+
+
+.input-area{
+
+padding:18px;
+
+background:white;
+
+display:flex;
+
+gap:12px;
+
+border-top:
+
+1px solid #eee;
+
+}
+
+
+
+
+input{
+
+flex:1;
+
+height:52px;
+
+border-radius:30px;
+
+border:
+
+1px solid #ddd;
+
+padding:0 20px;
+
+font-size:14px;
+
+outline:none;
+
+}
+
+
+
+input:focus{
+
+border-color:#ec4899;
+
+box-shadow:
+
+0 0 0 4px rgba(236,72,153,.12);
+
+}
+
+
+
+button{
+
+width:52px;
+
+height:52px;
+
+border:none;
+
+border-radius:50%;
+
+cursor:pointer;
+
+font-size:22px;
+
+color:white;
+
+background:
+
+linear-gradient(135deg,#ec4899,#8b5cf6);
+
+transition:.3s;
+
+}
+
+
+
+button:hover{
+
+transform:scale(1.1) rotate(5deg);
+
+}
+
+
+
+
+
+.typing{
+
+display:flex;
+
+gap:5px;
+
+font-size:13px;
+
+color:#777;
+
+margin:10px;
+
+}
+
+
+
+.dot{
+
+width:7px;
+height:7px;
+
+background:#ec4899;
+
+border-radius:50%;
+
+animation:bounce 1s infinite;
+
+}
+
+
+.dot:nth-child(2){
+
+animation-delay:.2s;
+
+}
+
+.dot:nth-child(3){
+
+animation-delay:.4s;
+
+}
+
+
+
+@keyframes bounce{
+
+50%{
+transform:translateY(-5px);
+}
+
+}
+
+
+
+
+
+@media(max-width:520px){
+
+
+.chat-container{
+
+width:100%;
+
+height:100vh;
+
+border-radius:0;
+
+}
+
+
+.header{
+
+padding:22px;
+
+}
+
+
+.message{
+
+max-width:90%;
+
+}
+
+}
+
+
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="chat-container">
+
+
+<div class="header">
+
+
+<div class="header-top">
+
+
+<div class="logo">
+
+🌸
+
+</div>
+
+
+<div>
+
+<h2>
+Women's Health AI
+</h2>
+
+
+</div>
+
+
+</div>
+
+
+<p>
+Your caring health information companion
+</p>
+
+
+</div>
+
+
+
+<div id="chat-box" class="chat-box">
+
+
+<div class="message bot">
+
+Hello 👋<br><br>
+
+I'm your women's health AI assistant.
+<br>
+Ask me anything about health, wellness, periods, nutrition, or general information.
+
+</div>
+
+
+</div>
+
+
+
+
+<div class="input-area">
+
+
+<input
+id="question"
+placeholder="Ask your health question..."
+onkeypress="handleKey(event)"
+>
+
+
+<button onclick="sendMessage()">
+
+➤
+
+</button>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<script>
+
+
+function formatAnswer(text){
+
+return text
+.replace(/\n- /g,"<br>• ")
+.replace(/\n/g,"<br>");
+
+}
+
+
+
+function addMessage(text,type){
+
+
+let box=document.getElementById("chat-box");
+
+
+let msg=document.createElement("div");
+
+
+msg.className="message "+type;
+
+
+msg.innerHTML =
+type==="bot"
+?
+formatAnswer(text)
+:
+text;
+
+
+box.appendChild(msg);
+
+
+box.scrollTop=box.scrollHeight;
+
+
+}
+
+
+
+
+async function sendMessage(){
+
+
+let input=document.getElementById("question");
+
+
+let question=input.value.trim();
+
+
+if(!question)
+return;
+
+
+
+addMessage(question,"user");
+
+
+input.value="";
+
+
+
+let typing=document.createElement("div");
+
+
+typing.className="typing";
+
+
+typing.innerHTML=
+`
+<span>AI thinking</span>
+<div class="dot"></div>
+<div class="dot"></div>
+<div class="dot"></div>
+`;
+
+
+
+let box=document.getElementById("chat-box");
+
+
+box.appendChild(typing);
+
+
+box.scrollTop=box.scrollHeight;
+
+
+
+try{
+
+
+let response=await fetch("/chat",{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+question:question
+
+})
+
+});
+
+
+
+let data=await response.json();
+
+
+
+typing.remove();
+
+
+addMessage(data.answer,"bot");
+
+
+}
+
+catch(error){
+
+
+typing.remove();
+
+
+addMessage(
+"Something went wrong. Please try again.",
+"bot"
+);
+
+
+}
+
+
+}
+
+
+
+
+
+function handleKey(e){
+
+if(e.key==="Enter"){
+
+sendMessage();
+
+}
+
+}
+
+
+
+</script>
+
+
+</body>
+
+</html>
+

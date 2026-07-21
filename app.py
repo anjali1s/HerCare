@@ -1,35 +1,162 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
-from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 
-from rag_chatbot import ask_question
+from database import engine, Base
 
-import os
-os.environ["ANONYMIZED_TELEMETRY"] = "False"
+from auth import router as auth_router
+from chat import router as chat_router
 
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+
+
+# -------------------------
+# Database Startup
+# -------------------------
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+
+    print("Starting application...")
+
+    # Create SQLite tables
+    Base.metadata.create_all(
+        bind=engine
+    )
+
+    print("Database initialized")
+
+    yield
+
+    print("Application shutdown")
+
+
+
+
+
+# -------------------------
+# FastAPI App
+# -------------------------
 
 app = FastAPI(
-    title="RAG Chatbot API"
+
+    title="Women's Health AI Assistant",
+
+    description=(
+        "Secure RAG based healthcare "
+        "information assistant"
+    ),
+
+    version="1.0.0",
+
+    lifespan=lifespan
+
 )
 
 
-class Question(BaseModel):
-    question: str
 
+
+
+# -------------------------
+# React CORS
+# -------------------------
+
+app.add_middleware(
+
+    CORSMiddleware,
+
+    allow_origins=[
+
+        "http://localhost:5174",
+
+       
+
+    ],
+
+    allow_credentials=True,
+
+    allow_methods=[
+
+        "*"
+
+    ],
+
+    allow_headers=[
+
+        "*"
+
+    ],
+
+)
+
+
+
+
+
+# -------------------------
+# API Routes
+# -------------------------
+
+app.include_router(
+
+    auth_router,
+
+    prefix="/auth",
+
+    tags=["Authentication"]
+
+)
+
+
+
+app.include_router(
+
+    chat_router,
+
+    prefix="/chat",
+
+    tags=["Chat"]
+
+)
+
+
+
+
+
+# -------------------------
+# Health Routes
+# -------------------------
 
 @app.get("/")
 def home():
-    return FileResponse("templates/bot.html")
-
-
-@app.post("/chat")
-def chat(data: Question):
-
-    answer = ask_question(data.question)
 
     return {
-        "answer": answer
+
+        "message":
+        "Women's Health AI API running",
+
+        "status":
+        "active"
+
     }
 
-#uvicorn app:app --reload
- 
+
+
+
+
+@app.get("/health")
+def health_check():
+
+    return {
+
+        "api":
+        "working",
+
+        "database":
+        "connected"
+
+    }

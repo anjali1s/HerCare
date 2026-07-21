@@ -38,3 +38,18 @@ Thumbs.db
 
 
 data/
+
+# Documents
+data/
+
+# Vector databases
+chroma_db/
+*.bin
+
+# Environment
+.env
+venv/
+
+# Python
+__pycache__/
+*.pyc
